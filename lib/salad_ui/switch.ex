@@ -24,7 +24,7 @@ defmodule SaladUI.Switch do
       type="button"
       role="switch"
       data-state={(@checked && "checked") || "unchecked"}
-      phx-click={toggle(@id)}
+      phx-click={handle_click(Map.get(@rest, :"phx-click"), @id)}
       class={
         classes([
           "group/switch inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
@@ -32,6 +32,7 @@ defmodule SaladUI.Switch do
       }
       id={@id}
       {%{disabled: @disabled}}
+      {@rest}
     >
       <span class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform group-data-[state=checked]/switch:translate-x-5 group-data-[state=unchecked]/switch:translate-x-0">
       </span>
@@ -48,8 +49,18 @@ defmodule SaladUI.Switch do
     """
   end
 
-  defp toggle(id) do
+  defp handle_click(%Phoenix.LiveView.JS{} = js, id) do
+    js
+    |> toggle(id)
+  end
+
+  defp handle_click(_js, id) do
     %JS{}
+    |> toggle(id)
+  end
+
+  defp toggle(js, id) do
+    js
     |> JS.toggle_attribute({"data-state", "checked", "unchecked"})
     |> JS.toggle_attribute({"checked", true}, to: "##{id} input[type=checkbox]")
   end
